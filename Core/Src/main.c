@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <stdarg.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,7 +55,21 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
+int uart_printf(const char* format, ...)
+{
+  char buffer[96];
+  va_list args;
+  va_start(args, format);
+  int len = vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
 
+  if(len > 0)
+  {
+    HAL_UART_Transmit(&huart2, (uint8_t*)buffer, len, HAL_MAX_DELAY);
+  }
+
+  return len;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -96,6 +111,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
 HAL_GPIO_WritePin(KOUSHUU_GPIO_Port,KOUSHUU_Pin,GPIO_PIN_SET);
 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+char c = 'A';
+
 
   /* USER CODE END 2 */
 
@@ -103,18 +120,31 @@ HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    for(int i=1;i<1000;i+=10){
+    /*for(int i=1;i<1000;i+=10){
       HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, i);
       HAL_Delay(10);
     }
     for(int i=999;i>=1;i-=10){
       HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, i);
       HAL_Delay(10);
+    }*/
+   
+    if(HAL_UART_Receive(&huart2, (uint8_t*)&c, sizeof(c), HAL_MAX_DELAY) == HAL_OK){
+      uart_printf("%u\n",c);
+      HAL_Delay(1000);
+      c++;
+      //補足：bufferそのものの値を変える必要がある可能性
+      HAL_UART_Transmit(&huart2, (uint8_t*)&c, sizeof(c), HAL_MAX_DELAY);
     }
+   
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    
+
+
   }
+  
   /* USER CODE END 3 */
 }
 
