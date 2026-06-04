@@ -43,6 +43,7 @@
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim3;
 
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -52,8 +53,9 @@ UART_HandleTypeDef huart2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_USART2_UART_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 int uart_printf(const char* format, ...)
 {
@@ -106,12 +108,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
   MX_TIM3_Init();
+  MX_USART2_UART_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 HAL_GPIO_WritePin(KOUSHUU_GPIO_Port,KOUSHUU_Pin,GPIO_PIN_SET);
 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-char c = 'A';
+//char c = 'A';
 
 
   /* USER CODE END 2 */
@@ -120,22 +123,24 @@ char c = 'A';
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /*for(int i=1;i<1000;i+=10){
-      HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, i);
+    for(int i=1;i<1000;i+=10){
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, i);
       HAL_Delay(10);
     }
     for(int i=999;i>=1;i-=10){
-      HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, i);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, i);
       HAL_Delay(10);
-    }*/
+    }
    
-    if(HAL_UART_Receive(&huart2, (uint8_t*)&c, sizeof(c), HAL_MAX_DELAY) == HAL_OK){
-      uart_printf("%u\n",c);
+    /*
+    if(HAL_UART_Receive(&huart1, (uint8_t*)&c, sizeof(c), HAL_MAX_DELAY) == HAL_OK){
+      uart_printf("receive%c\n",c);
       HAL_Delay(1000);
       c++;
-      //補足：bufferそのものの値を変える必要がある可能性
-      HAL_UART_Transmit(&huart2, (uint8_t*)&c, sizeof(c), HAL_MAX_DELAY);
+    
+      HAL_UART_Transmit(&huart1, (uint8_t*)&c, sizeof(c), HAL_MAX_DELAY);
     }
+      */
    
     /* USER CODE END WHILE */
 
@@ -252,6 +257,39 @@ static void MX_TIM3_Init(void)
 }
 
 /**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -267,7 +305,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
